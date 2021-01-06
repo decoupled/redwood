@@ -1,7 +1,7 @@
 import * as tsm from 'ts-morph'
 import { FileNode } from '../ide'
 import { iter } from '../x/Array'
-import { lazy } from '../x/decorators'
+import { lazy, memo } from '../x/decorators'
 import { basenameNoExt } from '../x/path'
 import { RWProject } from './RWProject'
 import { RWSDL } from './RWSDL'
@@ -56,4 +56,23 @@ export class RWService extends FileNode {
       }
     })
   }
+
+  outlineIcon = 'server'
+
+  @memo() outlineChildren() {
+    return [
+      ...this.getArtifactChildren({ test: true }),
+      ...this.funcs,
+      // {
+      //   outlineLabel: 'functions',
+      //   outlineChildren: () => this.funcs,
+      // },
+      {
+        outlineLabel: 'related sdl',
+        outlineChildren: () => [this.sdl],
+      },
+    ]
+  }
+
+  outlineLabel = this.basenameNoExt
 }

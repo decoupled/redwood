@@ -1,3 +1,4 @@
+import { Command_cli, Command_open } from 'src/x/vscode'
 import * as tsm from 'ts-morph'
 import {
   CodeAction,
@@ -20,14 +21,16 @@ import {
 } from '../x/vscode-languageserver-types'
 import { RWProject } from './RWProject'
 import { RWRoute } from './RWRoute'
-import { rangeRight } from 'lodash'
+import { OutlineInfoProvider } from './types'
 
 /**
  * one per Routes.js
  */
-export class RWRouter extends FileNode {
+export class RWRouter extends FileNode implements OutlineInfoProvider {
   constructor(public filePath: string, public parent: RWProject) {
     super()
+    if (typeof filePath !== 'string')
+      throw new Error('RWRouter( typeof filePath !== "string" )')
   }
   // this is used by the live preview
   @memo() getFilePathForRoutePath(routePath: string): string | undefined {
@@ -162,7 +165,15 @@ export class RWRouter extends FileNode {
       yield e
     }
   }
-  children() {
+  async children() {
     return [...this.routes]
+  }
+  outlineLabel = 'web / routes'
+  outlineIcon = 'globe'
+  outlineChildren = () => this.routes
+  outlineMenu = {
+    kind: 'group',
+    add: Command_cli('rw generate page ...'),
+    doc: Command_open('https://redwoodjs.com/docs/redwood-router'),
   }
 }

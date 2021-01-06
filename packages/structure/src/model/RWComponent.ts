@@ -2,10 +2,15 @@ import * as tsm from 'ts-morph'
 import { FileNode } from '../ide'
 import { lazy } from '../x/decorators'
 import { RWProject } from './RWProject'
+import { OutlineInfoProvider } from './types'
 
-export class RWComponent extends FileNode {
+export class RWComponent extends FileNode implements OutlineInfoProvider {
   constructor(public filePath: string, public parent: RWProject) {
     super()
+  }
+
+  get isCell() {
+    return false
   }
 
   @lazy() get hasDefaultExport(): boolean {
@@ -30,4 +35,12 @@ export class RWComponent extends FileNode {
       if (d.isExported()) ss.add(d.getName())
     return ss
   }
+
+  outlineChildren() {
+    return [...this.getArtifactChildren({ stories: true, test: true })]
+  }
+
+  outlineIcon = 'extensions'
+
+  outlineLabel = this.basenameNoExt
 }

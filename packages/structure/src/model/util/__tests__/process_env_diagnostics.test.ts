@@ -1,5 +1,6 @@
-import { process_env_findInFile, process_env_findAll } from '../process_env'
-import { resolve, join } from 'path'
+import { join } from 'path'
+import { getFixtureDir } from '../getFixtureDir'
+import { process_env_findAll, process_env_findInFile } from '../process_env'
 
 describe('process_env_findInFile', () => {
   test('can find process.env.FOO', () => {
@@ -41,9 +42,3 @@ describe('process_env_findInFile', () => {
     r //?
   })
 })
-
-function getFixtureDir(
-  name: 'example-todo-main-with-errors' | 'example-todo-main'
-) {
-  return resolve(__dirname, `../../../../../../__fixtures__/${name}`)
-}
