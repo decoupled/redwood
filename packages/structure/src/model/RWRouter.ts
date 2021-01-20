@@ -178,4 +178,31 @@ export class RWRouter extends FileNode implements OutlineInfoProvider {
     add: Command_cli('rw generate page ...'),
     doc: Command_open('https://redwoodjs.com/docs/redwood-router'),
   }
+
+  @lazy() get switchStatementForAlternateReturns() {
+    const lines: string[] = []
+    for (const route of this.routes) {
+      if (!route.path) continue
+      const v = route.whileLoading_attr_value
+      if (typeof v === 'undefined') continue
+      const key = route.path
+      lines.push(`
+      case ${JSON.stringify(key)}:
+        return (${v.getText()});
+      `)
+    }
+    return `
+    if (arguments.length > 0){
+      switch(arguments[0]){
+        ${lines.join('\n')}
+      }
+      return undefined
+    }
+    `
+  }
 }
+
+/*
+const Router$ = require("Routes.js")
+const x = Router$("/foo/bar")
+*/

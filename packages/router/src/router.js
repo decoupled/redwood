@@ -45,6 +45,8 @@ const PrivatePageLoader = ({
 }) => {
   const { loading, isAuthenticated, hasRole } = useAuth()
 
+  // ;(global)["__whileLoadingStuff__"][path] = whileLoading
+
   if (loading) {
     return whileLoading()
   }

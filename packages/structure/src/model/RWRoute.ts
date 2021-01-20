@@ -242,6 +242,15 @@ export class RWRoute extends BaseNode implements OutlineInfoProvider {
     }
   }
 
+  @lazy() get whileLoading_attr_value() {
+    const a = this.jsxNode.getAttribute('whileLoading')
+    if (!a) return undefined
+    if (tsm.Node.isJsxAttribute(a)) {
+      return a.getInitializer()
+    }
+    return undefined
+  }
+
   private getStringAttr(name: string) {
     const a = this.jsxNode.getAttribute(name)
     if (!a) return undefined
