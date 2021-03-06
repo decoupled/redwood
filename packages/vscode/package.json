@@ -1,0 +1,43 @@
+{
+  "name": "@redwoodjs/vscode",
+  "description": "Redwoodjs VSCode extension",
+  "version": "0.26.2",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "command-exists": "^1.2.9",
+    "execa": "^5.0.0",
+    "fkill": "^7.1.0",
+    "fs-extra": "^9.1.0",
+    "lazy-get-decorator": "^2.2.0",
+    "lodash": "^4.17.21",
+    "lodash-decorators": "^6.0.1",
+    "mobx": "^6.1.8",
+    "node-fetch": "^2.6.1",
+    "process-exists": "^4.0.0",
+    "tmp": "^0.2.1",
+    "vscode-extension-telemetry": "^0.1.6"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.46.0"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/fixtures/",
+      "/dist/"
+    ]
+  },
+  "scripts": {
+    "build": "yarn build:js",
+    "prepublishOnly": "yarn cross-env NODE_ENV=production yarn build",
+    "build:js": "babel src -d dist --extensions \".js,.ts,.tsx\"",
+    "build:watch": "nodemon --watch src --ext \"js,ts,tsx\" --ignore dist --exec \"yarn build\"",
+    "test": "jest",
+    "test:watch": "yarn test --watch",
+    "prettier": "prettier --write './src/**/*.{ts,tsx}'"
+  },
+  "gitHead": "c235e7d7186e5e258764699c0e0e1d5cc0fdd0b5"
+}
