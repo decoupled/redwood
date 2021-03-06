@@ -1,17 +1,17 @@
-const category = "Redwood"
+const category = 'Redwood'
 
-const base = "decoupled.redwoodjs-ide.commands"
+const base = 'decoupled.redwoodjs-ide.commands'
 
 export const redwoodjs_vsc_commands = {
   redwood_outline: {
-    command: base + ".outline",
-    title: "Show Project Outline",
+    command: base + '.outline',
+    title: 'Show Project Outline',
     category,
   },
 
   redwood_generate: {
-    command: base + ".generate",
-    title: "Generate...",
+    command: base + '.generate',
+    title: 'Generate...',
     _doc: `Calls "$ redwood generate" in interactive mode.
       Generated files will not be written directly to disk. Instead, VSCode's workspace edit API will be used.
       This provides better integration with undo/redo and it lets you see all changes before saving.`,
@@ -19,8 +19,8 @@ export const redwoodjs_vsc_commands = {
   },
 
   redwood_cli: {
-    command: "redwoodjs.cli", // delegate to the LSP directly
-    title: "Interactive CLI...",
+    command: 'redwoodjs.cli', // delegate to the LSP directly
+    title: 'Interactive CLI...',
     _doc: `
       Starts the Redwood CLI in interactive mode.
       The interactive mode will inspect your project and schema to provide autocomplete and options whenever possible`,

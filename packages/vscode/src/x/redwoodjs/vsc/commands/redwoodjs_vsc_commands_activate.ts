@@ -1,7 +1,9 @@
-import { values } from "lodash"
-import vscode from "vscode"
-import { redwoodjs_vsc_enabled } from "../redwoodjs_vsc_enabled"
-import { redwoodjs_vsc_commands } from "./redwoodjs_vsc_commands"
+import { values } from 'lodash'
+import vscode from 'vscode'
+
+import { redwoodjs_vsc_enabled } from '../redwoodjs_vsc_enabled'
+
+import { redwoodjs_vsc_commands } from './redwoodjs_vsc_commands'
 
 export function redwoodjs_vsc_commands_activate(ctx: vscode.ExtensionContext) {
   const { registerCommand, executeCommand } = vscode.commands
@@ -16,7 +18,7 @@ export function redwoodjs_vsc_commands_activate(ctx: vscode.ExtensionContext) {
     // }),
     registerCommand(c.redwood_generate.command, async () => {
       // TODO: get current file
-      executeCommand("redwoodjs.cli", "generate...")
+      executeCommand('redwoodjs.cli', 'generate...')
     }),
     // registerCommand(c.redwood_graphql.command, async () => {
     //   // TODO: get current file
@@ -83,11 +85,11 @@ export function redwoodjs_vsc_commands_activate(ctx: vscode.ExtensionContext) {
 
 export function ___buildmeta___() {
   const commands = values(redwoodjs_vsc_commands)
-  const command_ids = commands.map(c => c.command)
+  const command_ids = commands.map((c) => c.command)
   // only enable when in a redwood project
-  const commandPalette = command_ids.map(command => ({
+  const commandPalette = command_ids.map((command) => ({
     command,
-    when: redwoodjs_vsc_enabled + "==true",
+    when: redwoodjs_vsc_enabled + '==true',
   }))
   return {
     pjson: {

@@ -1,36 +1,37 @@
-import { memoize } from "lodash"
-import { userInfo } from "os"
-import { sep } from "path"
-import vscode from "vscode"
-import TelemetryReporter from "vscode-extension-telemetry"
-import { vscode_ExtensionContext_current } from "../../vscode/vscode_ExtensionContext"
-import { LazyGetter as lazy } from "lazy-get-decorator"
-import { vscode_extensions_getCurrentExtensionID } from "../../vscode/vscode_extensions_getCurrentExtensionID"
+import { userInfo } from 'os'
+import { sep } from 'path'
 
-export const redwoodjs_vsc_telemetry_reporter2 = memoize(() => {
-  return new Reporter()
-})
+import { LazyGetter as lazy } from 'lazy-get-decorator'
+import { memoize } from 'lodash'
+import vscode from 'vscode'
+import TelemetryReporter from 'vscode-extension-telemetry'
+
+import { vscode_extensions_getExtensionID } from '../../vscode/vscode_extensions_getExtensionID'
+
+export const redwoodjs_vsc_telemetry_reporter2 = memoize(
+  (ctx: vscode.ExtensionContext) => {
+    return new Reporter(ctx)
+  }
+)
 
 // most code taken from: https://github.com/Almenon/AREPL-vscode/blob/master/src/areplUtilities.ts
 
 class Reporter {
   private reporter: TelemetryReporter
-  private timeActivated: number = 0
-  private lastStackTrace: string = ""
+  private timeActivated = 0
+  private lastStackTrace = ''
 
-  constructor() {
+  constructor(public ctx: vscode.ExtensionContext) {
     this.timeActivated = 0
-
-    const extensionId = vscode_extensions_getCurrentExtensionID(
-      vscode_ExtensionContext_current()
-    )
+    const extensionId = vscode_extensions_getExtensionID(ctx)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const extension = vscode.extensions.getExtension(extensionId)!
     const extensionVersion = extension.packageJSON.version
 
     // make it harder for bots
-    const k1 = "67b2b5a8-4d36-469c"
-    const k2 = "-8147-bf438d007b6b"
-    const k = [k1, k2].join("")
+    const k1 = '67b2b5a8-4d36-469c'
+    const k2 = '-8147-bf438d007b6b'
+    const k = [k1, k2].join('')
 
     this.reporter = new TelemetryReporter(extensionId, extensionVersion, k)
     this.event_activate()
@@ -38,7 +39,7 @@ class Reporter {
 
   get enableTelemetry() {
     return (
-      vscode.workspace.getConfiguration().get("telemetry.enableTelemetry") !==
+      vscode.workspace.getConfiguration().get('telemetry.enableTelemetry') !==
       false
     )
   }
@@ -47,15 +48,11 @@ class Reporter {
     return (
       vscode.workspace
         .getConfiguration()
-        .get("telemetry.enableCrashReporter") !== false
+        .get('telemetry.enableCrashReporter') !== false
     )
   }
 
-  get ctx() {
-    return vscode_ExtensionContext_current()
-  }
-
-  sendError(error: Error, code: number = 0, category = "typescript") {
+  sendError(error: Error, code = 0, category = 'typescript') {
     console.error(
       `${category} error: ${error.name} code ${code}\n${error.stack}`
     )
@@ -63,7 +60,9 @@ class Reporter {
       error.stack = this.anonymizePaths((error as any).stack)
 
       // no point in sending same error twice (and we want to stay under free API limit)
-      if (error.stack == this.lastStackTrace) return
+      if (error.stack == this.lastStackTrace) {
+        return
+      }
 
       this.reporter.sendTelemetryException(error, {
         code: code.toString(),
@@ -81,20 +80,20 @@ class Reporter {
   private sendFinishedEvent(settings: vscode.WorkspaceConfiguration) {
     if (this.enableTelemetry) {
       const measurements: { [key: string]: number } = {}
-      measurements["timeSpent"] = (Date.now() - this.timeActivated) / 1000
+      measurements['timeSpent'] = (Date.now() - this.timeActivated) / 1000
 
       const properties: { [key: string]: string } = {}
 
       // no idea why I did this but i think there was a reason?
       // this is why you leave comments people
       const settingsDict = JSON.parse(JSON.stringify(settings))
-      for (let key in settingsDict) {
+      for (const key in settingsDict) {
         properties[key] = settingsDict[key]
       }
 
       // properties['pythonPath'] = this.anonymizePaths(areplUtils.getPythonPath())
       // properties['pythonVersion'] = this.pythonVersion
-      this.reporter.sendTelemetryEvent("closed", properties, measurements)
+      this.reporter.sendTelemetryEvent('closed', properties, measurements)
     }
   }
 
@@ -102,19 +101,21 @@ class Reporter {
    * replace username with anon
    */
   anonymizePaths(input: string) {
-    if (input == null) return input
+    if (input == null) {
+      return input
+    }
     return input.replace(
-      new RegExp("\\" + sep + userInfo().username, "g"),
-      sep + "anon"
+      new RegExp('\\' + sep + userInfo().username, 'g'),
+      sep + 'anon'
     )
   }
 
   @lazy() get extensionMode_string() {
     const mm = vscode.ExtensionMode
     const m = {
-      [mm.Production]: "production",
-      [mm.Development]: "development",
-      [mm.Test]: "test",
+      [mm.Production]: 'production',
+      [mm.Development]: 'development',
+      [mm.Test]: 'test',
     }
     return m[this.ctx.extensionMode]
   }
@@ -126,8 +127,12 @@ class Reporter {
   }
 
   private get enabled() {
-    if (!this.enableTelemetry) return false
-    if (this.ctx.extensionMode === vscode.ExtensionMode.Test) return false
+    if (!this.enableTelemetry) {
+      return false
+    }
+    if (this.ctx.extensionMode === vscode.ExtensionMode.Test) {
+      return false
+    }
     return true
   }
 
@@ -136,7 +141,9 @@ class Reporter {
     properties?: Properties,
     measurements?: Measurements
   ): void {
-    if (!this.enabled) return
+    if (!this.enabled) {
+      return
+    }
     this.reporter.sendTelemetryEvent(
       eventName,
       this.processProperties(properties),
@@ -149,7 +156,9 @@ class Reporter {
     measurements?: Measurements,
     errorProps?: string[]
   ): void {
-    if (!this.enabled) return
+    if (!this.enabled) {
+      return
+    }
     this.reporter.sendTelemetryErrorEvent(
       eventName,
       this.processProperties(properties),
@@ -162,7 +171,9 @@ class Reporter {
     properties?: Properties,
     measurements?: Measurements
   ): void {
-    if (!this.enabled) return
+    if (!this.enabled) {
+      return
+    }
     this.reporter.sendTelemetryException(
       error,
       this.processProperties(properties),
@@ -177,13 +188,13 @@ class Reporter {
 
   // we call this one ourselves
   private event_activate() {
-    this.sendTelemetryEvent("activate", {}, {})
+    this.sendTelemetryEvent('activate', {}, {})
   }
   event_deactivate() {
-    this.sendTelemetryEvent("deactivate", {}, {})
+    this.sendTelemetryEvent('deactivate', {}, {})
   }
   event_redwoodProjectDetected(props: { redwoodVersion: string }) {
-    this.sendTelemetryEvent("redwoodProjectDetected", props, {})
+    this.sendTelemetryEvent('redwoodProjectDetected', props, {})
   }
 }
 

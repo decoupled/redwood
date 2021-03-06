@@ -1,7 +1,7 @@
-import * as fs from "fs-extra"
-import { cloneDeep } from "lodash"
-import { Memoize as memo } from "lodash-decorators"
-import vscode, { window, workspace } from "vscode"
+import * as fs from 'fs-extra'
+import { cloneDeep } from 'lodash'
+import { Memoize as memo } from 'lodash-decorators'
+import vscode, { window, workspace } from 'vscode'
 import {
   CloseAction,
   ErrorAction,
@@ -11,11 +11,13 @@ import {
   ServerOptions,
   State,
   TransportKind,
-} from "vscode-languageclient"
-import { URL_fromFile } from "../../../url/URL_fromFile"
-import { vscode_window_createTerminal_andRun } from "../../../vscode/vscode_window_createTerminal_andRun"
-import { redwoodjs_vsc_log } from "../../redwoodjs_vsc_log"
-import { redwoodjs_vsc_lsp_treeview_setup } from "./treeview/redwoodjs_vsc_lsp_treeview_setup"
+} from 'vscode-languageclient/node'
+
+import { URL_fromFile } from '../../../url/URL_fromFile'
+import { vscode_window_createTerminal_andRun } from '../../../vscode/vscode_window_createTerminal_andRun'
+import { redwoodjs_vsc_log } from '../../redwoodjs_vsc_log'
+
+import { redwoodjs_vsc_lsp_treeview_setup } from './treeview/redwoodjs_vsc_lsp_treeview_setup'
 
 /**
  * the lsp module can come and go as the user installs/uninstalls node_modules.
@@ -41,7 +43,9 @@ export class RedwoodLSPClientManager {
         this.client = undefined
       }
     }
-    if (!this.stopped) setTimeout(() => this.tick(), 1000)
+    if (!this.stopped) {
+      setTimeout(() => this.tick(), 1000)
+    }
   }
   private stopped = false
   stop() {
@@ -56,10 +60,10 @@ export class RedwoodLSPClient {
   ) {
     this.start()
   }
-  status: "init" | "running" | "stopped" = "init"
+  status: 'init' | 'running' | 'stopped' = 'init'
   client!: LanguageClient
   private log(...args: any[]) {
-    const msg = args.map(String).join(" ")
+    const msg = args.map(String).join(' ')
     redwoodjs_vsc_log(msg)
     console.log(msg)
   }
@@ -68,22 +72,22 @@ export class RedwoodLSPClient {
     this.log(`RedwoodLSPClient(${this.pathToModule}).start()`)
     // Create the language client and start the client.
     this.client = new LanguageClient(
-      "redwood-language-server",
-      "Redwood Language Server",
+      'redwood-language-server',
+      'Redwood Language Server',
       buildServerOptions(this.pathToModule),
       buildClientOptions()
     )
 
-    this.client.onDidChangeState(e => {
+    this.client.onDidChangeState((e) => {
       const labels = {
-        [State.Running]: "Running",
-        [State.Starting]: "Starting",
-        [State.Stopped]: "Stopped",
+        [State.Running]: 'Running',
+        [State.Starting]: 'Starting',
+        [State.Stopped]: 'Stopped',
       }
       this.log(
-        "Language Client state change:",
+        'Language Client state change:',
         labels[e.oldState],
-        "-->",
+        '-->',
         labels[e.newState]
       )
     })
@@ -92,16 +96,16 @@ export class RedwoodLSPClient {
     this.client.start()
     await this.client.onReady()
     this.log(`RedwoodLSPClient(${this.pathToModule}).client.onReady()`)
-    this.status = "running"
-    this.client.onRequest("xxx/showQuickPick", window.showQuickPick)
+    this.status = 'running'
+    this.client.onRequest('xxx/showQuickPick', window.showQuickPick)
     this.client.onRequest(
-      "xxx/showInformationMessage",
+      'xxx/showInformationMessage',
       window.showInformationMessage
     )
     // TODO: handle validate input
-    this.client.onRequest("xxx/showInputBox", window.showInputBox)
+    this.client.onRequest('xxx/showInputBox', window.showInputBox)
     this.client.onRequest(
-      "xxx/createTerminal2",
+      'xxx/createTerminal2',
       async (props: { name: string; cwd: string; cmd: string }) => {
         vscode_window_createTerminal_andRun(props)
       }
@@ -112,7 +116,7 @@ export class RedwoodLSPClient {
   async getInfo(uri: string): Promise<any[]> {
     await this.client.onReady()
     try {
-      return await this.client.sendRequest("redwoodjs/x-getInfo", [uri])
+      return await this.client.sendRequest('redwoodjs/x-getInfo', [uri])
     } catch (e) {
       return []
     }
@@ -124,18 +128,20 @@ export class RedwoodLSPClient {
     await this.client.onReady()
     try {
       return await this.client.sendRequest(
-        "redwoodjs/x-getFilePathForRoutePath",
+        'redwoodjs/x-getFilePathForRoutePath',
         [routePath]
       )
+      // eslint-disable-next-line no-empty
     } catch (e) {}
   }
   async getRoutePathForFilePath(filePath: string): Promise<string | undefined> {
     await this.client.onReady()
     try {
       return await this.client.sendRequest(
-        "redwoodjs/x-getRoutePathForFilePath",
+        'redwoodjs/x-getRoutePathForFilePath',
         [URL_fromFile(filePath)]
       )
+      // eslint-disable-next-line no-empty
     } catch (e) {}
   }
 
@@ -147,9 +153,11 @@ export class RedwoodLSPClient {
 
   async stop() {
     this.log(`RedwoodLSPClient(${this.pathToModule}).stop()`)
-    if (this.status !== "running") return false
+    if (this.status !== 'running') {
+      return false
+    }
     await this.client.stop()
-    this.status = "stopped"
+    this.status = 'stopped'
   }
 }
 
@@ -161,7 +169,7 @@ export class RedwoodLSPClient {
 function buildServerOptions(module: string): ServerOptions {
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
-  const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] }
+  const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] }
   // If the extension is launched in debug mode then the debug server options are used
   // Otherwise the run options are used
   return {
@@ -176,26 +184,26 @@ function buildServerOptions(module: string): ServerOptions {
 
 function buildClientOptions() {
   const tsLanguageIDs = [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "toml",
-    "json",
+    'javascript',
+    'javascriptreact',
+    'typescript',
+    'typescriptreact',
+    'toml',
+    'json',
   ]
-  const tsLanguageselectors = tsLanguageIDs.map(language => ({
-    scheme: "file",
+  const tsLanguageselectors = tsLanguageIDs.map((language) => ({
+    scheme: 'file',
     language,
   }))
   const documentSelector = [
     ...tsLanguageselectors,
-    { scheme: "file", language: "toml", pattern: "redwood.toml" },
-    { scheme: "file", language: "prisma", pattern: "schema.prisma" },
+    { scheme: 'file', language: 'toml', pattern: 'redwood.toml' },
+    { scheme: 'file', language: 'prisma', pattern: 'schema.prisma' },
   ]
   // Options to control the language client
-  const errorHandler: ErrorHandler = {
+  const _errorHandler: ErrorHandler = {
     error(error, message, count) {
-      console.log("lsp client connection error", error, message, count)
+      console.log('lsp client connection error', error, message, count)
       return ErrorAction.Shutdown
     },
     closed() {
@@ -204,7 +212,7 @@ function buildClientOptions() {
   }
   return {
     documentSelector,
-    diagnosticCollectionName: "Redwood",
+    diagnosticCollectionName: 'Redwood',
     // errorHandler,
     // middleware: {
     //   async provideCodeLenses(document, token, next) {
@@ -217,23 +225,24 @@ function buildClientOptions() {
     // },
     synchronize: {
       fileEvents: workspace.createFileSystemWatcher(
-        "**/.{ts,tsx,js,jsx,toml,json,prisma}"
+        '**/.{ts,tsx,js,jsx,toml,json,prisma}'
       ),
     },
   } as LanguageClientOptions
 }
 
-function processCommand(cmd: vscode.Command): vscode.Command {
+function _processCommand(cmd: vscode.Command): vscode.Command {
   const { command, arguments: args, ...rest } = cloneDeep(cmd)
   if (args) {
     const a0 = args[0]
-    if (typeof a0 === "string") {
+    if (typeof a0 === 'string') {
       if (
-        a0.startsWith("https://") ||
-        a0.startsWith("http://") ||
-        a0.startsWith("file://")
-      )
+        a0.startsWith('https://') ||
+        a0.startsWith('http://') ||
+        a0.startsWith('file://')
+      ) {
         args[0] = vscode.Uri.parse(a0)
+      }
     }
   }
   return { command, arguments: args, ...rest }

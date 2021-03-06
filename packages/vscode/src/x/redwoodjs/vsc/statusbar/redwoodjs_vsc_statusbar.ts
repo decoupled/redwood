@@ -1,11 +1,12 @@
-import { LazyGetter as lazy } from "lazy-get-decorator"
-import { values } from "lodash"
-import { Memoize as memo } from "lodash-decorators"
-import { computed, observable, reaction } from "mobx"
-import { now } from "mobx-utils"
-import vscode from "vscode"
-import { redwoodjs_get_installed_framework_version_for_project } from "../../util/redwoodjs_get_installed_framework_version_for_project"
-import { redwoodjs_get_latest_version } from "../../util/redwoodjs_get_latest_version"
+import { LazyGetter as lazy } from 'lazy-get-decorator'
+import { values } from 'lodash'
+import { Memoize as memo } from 'lodash-decorators'
+import { computed, observable, reaction } from 'mobx'
+import { now } from 'mobx-utils'
+import vscode from 'vscode'
+
+import { redwoodjs_get_installed_framework_version_for_project } from '../../util/redwoodjs_get_installed_framework_version_for_project'
+import { redwoodjs_get_latest_version } from '../../util/redwoodjs_get_latest_version'
 
 export class RedwoodjsStatusBarManager {
   private disposables: vscode.Disposable[] = []
@@ -15,10 +16,12 @@ export class RedwoodjsStatusBarManager {
     const d1 = vscode.commands.registerCommand(
       commandss.show_new_version_message.command,
       async () => {
-        if (!this.installedFrameworkVersion) return
+        if (!this.installedFrameworkVersion) {
+          return
+        }
         const m = this.newerVersionIsAvailable
-          ? "A newer version of Redwood is available"
-          : "You are using the latest Redwood version"
+          ? 'A newer version of Redwood is available'
+          : 'You are using the latest Redwood version'
         vscode.window.showInformationMessage(m)
       }
     )
@@ -26,7 +29,7 @@ export class RedwoodjsStatusBarManager {
 
     const d2 = reaction(
       () => this.statusBarItemText,
-      x => {
+      (x) => {
         this.statusBarItem.text = x
       },
       { fireImmediately: true }
@@ -39,7 +42,7 @@ export class RedwoodjsStatusBarManager {
 
   @memo()
   dispose() {
-    this.disposables.forEach(d => d.dispose())
+    this.disposables.forEach((d) => d.dispose())
   }
 
   @computed
@@ -57,15 +60,21 @@ export class RedwoodjsStatusBarManager {
   }
 
   @computed get newerVersionIsAvailable() {
-    if (!this.latestVersion) return false
-    if (!this.installedFrameworkVersion) return false
+    if (!this.latestVersion) {
+      return false
+    }
+    if (!this.installedFrameworkVersion) {
+      return false
+    }
     return this.latestVersion !== this.installedFrameworkVersion
   }
 
   @computed
   get statusBarItemText() {
     const v = this.installedFrameworkVersion
-    if (!v) return "Redwood"
+    if (!v) {
+      return 'Redwood'
+    }
     const icon = `$(info)`
     if (this.newerVersionIsAvailable) {
       return `Redwood ${v} ${icon}`
@@ -88,8 +97,8 @@ export class RedwoodjsStatusBarManager {
 
 const commandss = {
   show_new_version_message: {
-    command: "_decoupled.redwoodjs-ide.show_new_version_message",
-    title: "show new version message",
+    command: '_decoupled.redwoodjs-ide.show_new_version_message',
+    title: 'show new version message',
   },
 }
 

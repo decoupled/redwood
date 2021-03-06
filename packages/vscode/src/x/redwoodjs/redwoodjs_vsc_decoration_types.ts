@@ -1,9 +1,10 @@
-import { memoize } from "lodash"
-import * as vscode from "vscode"
+import { memoize } from 'lodash'
+import * as vscode from 'vscode'
 
-const lightblue = "#9cdcfe"
-const purple = "#c586c0"
-const yellow = "#dcdcaa"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const lightblue = '#9cdcfe'
+const purple = '#c586c0'
+const yellow = '#dcdcaa'
 
 export const redwoodjs_vsc_decoration_types = memoize(() => {
   const tt = vscode.window.createTextEditorDecorationType
@@ -15,10 +16,10 @@ export const redwoodjs_vsc_decoration_types = memoize(() => {
       //textDecoration: "underline",
       //fontWeight: "bold",
       //fontStyle: "italic",
-      opacity: "0.5",
+      opacity: '0.5',
     }),
     path_slash: tt({
-      opacity: "0.7",
+      opacity: '0.7',
     }),
     path_parameter: tt({
       color: yellow,

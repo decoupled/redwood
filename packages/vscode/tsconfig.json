@@ -13,7 +13,7 @@
     "noImplicitAny": false,
     "noUnusedLocals": false
   },
-  "include": ["src"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../internal"

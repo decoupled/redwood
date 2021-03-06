@@ -1,6 +1,6 @@
-import { memoize } from "lodash"
-import { observable as o } from "mobx"
-import * as vscode from "vscode"
+import { memoize } from 'lodash'
+import { observable as o } from 'mobx'
+import * as vscode from 'vscode'
 
 export const vscode_mobx = memoize(() => new VSCodeMobx())
 
@@ -22,7 +22,7 @@ class VSCodeMobx {
 
     this._workspaceFolders = vscode.workspace.workspaceFolders || []
     vscode.workspace.onDidChangeWorkspaceFolders(
-      (e) => (this._workspaceFolders = vscode.workspace.workspaceFolders || [])
+      () => (this._workspaceFolders = vscode.workspace.workspaceFolders || [])
     )
   }
 

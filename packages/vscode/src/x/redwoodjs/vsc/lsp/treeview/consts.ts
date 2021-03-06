@@ -1,8 +1,10 @@
-import { mapValues, values } from "lodash"
-import { icon_rel_path } from "./icon_rel_path"
-import { redwoodjs_vsc_enabled } from "../../redwoodjs_vsc_enabled"
+import { mapValues, values } from 'lodash'
 
-export const redwoodjs_treeview_id = "decoupled.redwoodjs-ide.treeview"
+import { redwoodjs_vsc_enabled } from '../../redwoodjs_vsc_enabled'
+
+import { icon_rel_path } from './icon_rel_path'
+
+export const redwoodjs_treeview_id = 'decoupled.redwoodjs-ide.treeview'
 
 export function contextValue(str: string): string {
   return `${redwoodjs_treeview_id}.contextValue.${str}`
@@ -11,54 +13,54 @@ export function contextValue(str: string): string {
 export const commands = addCommandPropertyFromKey(
   {
     doc: {
-      title: "Documentation",
-      icon: icon_rel_path("help"),
+      title: 'Documentation',
+      icon: icon_rel_path('help'),
     },
     select: {
-      title: "Select",
+      title: 'Select',
     },
     refresh: {
-      title: "Refresh",
-      icon: icon_rel_path("refresh"),
+      title: 'Refresh',
+      icon: icon_rel_path('refresh'),
     },
     add: {
-      title: "Add",
-      icon: icon_rel_path("add"),
+      title: 'Add',
+      icon: icon_rel_path('add'),
     },
     run: {
-      title: "Run",
-      icon: icon_rel_path("play"),
+      title: 'Run',
+      icon: icon_rel_path('play'),
     },
     edit: {
-      title: "Edit",
-      icon: icon_rel_path("edit"),
+      title: 'Edit',
+      icon: icon_rel_path('edit'),
     },
     openInBrowser: {
-      title: "Open in Browser",
-      icon: icon_rel_path("open_in_browser"),
+      title: 'Open in Browser',
+      icon: icon_rel_path('open_in_browser'),
     },
     openComponent: {
-      title: "Open React Component",
-      icon: icon_rel_path("open_component"),
+      title: 'Open React Component',
+      icon: icon_rel_path('open_component'),
     },
     openRoute: {
-      title: "Open Route Definition",
-      icon: icon_rel_path("open_route"),
+      title: 'Open Route Definition',
+      icon: icon_rel_path('open_route'),
     },
     delete: {
-      title: "Delete",
+      title: 'Delete',
     },
     dev_server_start: {
-      title: "Start Dev Server",
+      title: 'Start Dev Server',
     },
     dev_server_stop: {
-      title: "Stop Dev Server",
+      title: 'Stop Dev Server',
     },
     dev_server_restart: {
-      title: "Restart Dev Server",
+      title: 'Restart Dev Server',
     },
     db_up: {
-      title: "rw db up",
+      title: 'rw db up',
     },
   },
   `${redwoodjs_treeview_id}.commands.`
@@ -71,16 +73,16 @@ export const itemTypes: {
 } = {
   // ---- start new
   withDoc: {
-    inline: ["doc"],
+    inline: ['doc'],
   },
   cli: {
-    inline: ["run", "doc"],
+    inline: ['run', 'doc'],
   },
   group: {
-    inline: ["add", "doc"],
+    inline: ['add', 'doc'],
   },
   route: {
-    inline: ["openComponent", "openInBrowser", "openRoute"],
+    inline: ['openComponent', 'openInBrowser', 'openRoute'],
   },
   // ----- end new
 }
@@ -97,20 +99,20 @@ const get_pjson = () => {
     contributes: {
       commands: [...values(commands)],
       menus: {
-        "view/title": [
+        'view/title': [
           {
             command: commands.refresh.command,
             when: isThisView,
-            group: "navigation",
+            group: 'navigation',
           },
         ],
-        "view/item/context": [...addMenus2()],
+        'view/item/context': [...addMenus2()],
       },
       views: {
         explorer: [
           {
             id: redwoodjs_treeview_id,
-            name: "Redwood Outline",
+            name: 'Redwood Outline',
             when: redwoodjs_vsc_enabled,
           },
         ],
@@ -132,21 +134,21 @@ const get_pjson = () => {
         yield {
           command: commands[cc].command,
           when,
-          group: "inline",
+          group: 'inline',
         }
       }
     }
   }
 }
 
-function icon(name: string) {
-  return {
-    light: `assets/icons/light/${name}.svg`,
-    dark: `assets/icons/dark/${name}.svg`,
-  }
-}
+// function icon(name: string) {
+//   return {
+//     light: `assets/icons/light/${name}.svg`,
+//     dark: `assets/icons/dark/${name}.svg`,
+//   }
+// }
 
-function addCommandPropertyFromKey<T extends object>(
+function addCommandPropertyFromKey<T extends Record<string, any>>(
   cmds: T,
   base: string
 ): { [K in keyof T]: T[K] & { command: string } } {

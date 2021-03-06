@@ -1,11 +1,13 @@
-import execa from "execa"
-import * as fs from "fs"
-import { LazyGetter as lazy } from "lazy-get-decorator"
-import { Memoize as memo } from "lodash-decorators"
-import { basename } from "path"
-import * as vscode from "vscode"
-import { vscode_ } from "../vscode/vscode_"
-import { yarn_or_npm } from "../yarn/yarn_or_npm"
+import * as fs from 'fs'
+import { basename } from 'path'
+
+import execa from 'execa'
+import { LazyGetter as lazy } from 'lazy-get-decorator'
+import { Memoize as memo } from 'lodash-decorators'
+import * as vscode from 'vscode'
+
+import { vscode_ } from '../vscode/vscode_'
+import { yarn_or_npm } from '../yarn/yarn_or_npm'
 
 type Importer = (ctx: vscode.ExtensionContext) => Promise<Extension>
 
@@ -23,7 +25,7 @@ class Preactivator {
   constructor(private importer: Importer) {}
 
   get hasNodeModulesFolder() {
-    return fs.existsSync(this.ctx.extensionPath + "/node_modules")
+    return fs.existsSync(this.ctx.extensionPath + '/node_modules')
   }
 
   @lazy() get extensionName() {
@@ -41,18 +43,21 @@ class Preactivator {
   }
 
   get ctx() {
-    if (!this._ctx) throw new Error("ctx not defined")
-    return this._ctx!
+    if (!this._ctx) {
+      throw new Error('ctx not defined')
+    } else {
+      return this._ctx
+    }
   }
 
   async activate(ctx: vscode.ExtensionContext) {
     this._ctx = ctx
-    this.log("process.pid=" + process.pid)
-    this.log("extensionPath=" + this.ctx.extensionPath)
-    this.log("extensionMode=" + this.ctx.extensionMode)
-    this.log("preactivate...")
+    this.log('process.pid=' + process.pid)
+    this.log('extensionPath=' + this.ctx.extensionPath)
+    this.log('extensionMode=' + this.ctx.extensionMode)
+    this.log('preactivate...')
     if (!this.hasNodeModulesFolder) {
-      this.log("node_modules not found")
+      this.log('node_modules not found')
       await this.vscode.window.withProgress(
         {
           location: this.vscode.ProgressLocation.Window,
@@ -63,9 +68,9 @@ class Preactivator {
         }
       )
     } else {
-      this.log("node_modules present. no need to install")
+      this.log('node_modules present. no need to install')
     }
-    this.log("ready to activate real extension")
+    this.log('ready to activate real extension')
     return (await this.realExtension()).activate(this.ctx)
   }
 
@@ -89,20 +94,22 @@ class Preactivator {
 
   private log(...args: any[]) {
     console.log(...args)
-    this.outputChannel.appendLine(args.join(" "))
+    this.outputChannel.appendLine(args.join(' '))
   }
 
   @memo()
   private async installModules() {
     let y_n = yarn_or_npm()
-    if (typeof y_n !== "string") {
+    if (typeof y_n !== 'string') {
       //throw new Error("Could not find yarn or NPM")
-      y_n = "npm"
+      y_n = 'npm'
     }
     // TODO: yarn install --frozen-lockfile
-    this.log("installing modules with " + y_n)
+    this.log('installing modules with ' + y_n)
     const cmd_args: string[] = [y_n]
-    if (y_n === "npm") cmd_args.push("install")
+    if (y_n === 'npm') {
+      cmd_args.push('install')
+    }
     const [cmd, ...args] = cmd_args
     this.log(cmd_args)
     const { stdout, stderr } = await execa(cmd, args, {
