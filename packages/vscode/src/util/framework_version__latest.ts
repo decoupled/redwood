@@ -1,7 +1,5 @@
 import fetch from 'node-fetch'
-export async function redwoodjs_get_latest_version(): Promise<
-  string | undefined
-> {
+export async function framework_version__latest(): Promise<string | undefined> {
   const name = '@redwoodjs/core'
   const nn = encodeURIComponent(name)
   const url = 'https://registry.npmjs.org/' + nn

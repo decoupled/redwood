@@ -2,14 +2,14 @@ import { cloneDeep } from 'lodash'
 import vscode from 'vscode'
 import { LanguageClient } from 'vscode-languageclient/node'
 
-import { vscode_ThemeIcon_memo } from '../../../../vscode/vscode_ThemeIcon_memo'
-import { redwoodjs_vsc_log } from '../../../redwoodjs_vsc_log'
+import { log } from '../../log'
+import { vscode_ThemeIcon_memo } from '../../x/vscode/vscode_ThemeIcon_memo'
 
 import { contextValue, redwoodjs_treeview_id } from './consts'
 import { icon_uri } from './icon_uri'
 import { register_commands } from './register_commands'
 
-export function redwoodjs_vsc_lsp_treeview_setup(opts: {
+export function treeview_setup(opts: {
   ctx: vscode.ExtensionContext
   client: LanguageClient
 }) {
@@ -33,7 +33,7 @@ export function redwoodjs_vsc_lsp_treeview_setup(opts: {
           )
           return res as any
         } catch (e) {
-          redwoodjs_vsc_log('redwoodjs/x-outline-getChildren error: ' + e)
+          log('redwoodjs/x-outline-getChildren error: ' + e)
           return []
         }
       },

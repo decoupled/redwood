@@ -6,9 +6,7 @@ import { readJSONSync } from 'fs-extra'
  * gets the installed framework version
  * @param projectRoot
  */
-export function redwoodjs_get_installed_framework_version_for_project(
-  projectRoot: string
-) {
+export function framework_version__installed(projectRoot: string) {
   try {
     const pp = join(projectRoot, 'node_modules/@redwoodjs/core/package.json')
     const v = readJSONSync(pp).version

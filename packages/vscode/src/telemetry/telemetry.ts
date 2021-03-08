@@ -6,7 +6,7 @@ import { memoize } from 'lodash'
 import vscode from 'vscode'
 import TelemetryReporter from 'vscode-extension-telemetry'
 
-import { vscode_extensions_getExtensionID } from '../../vscode/vscode_extensions_getExtensionID'
+import { vscode_extensions_getExtensionID } from '../x/vscode/vscode_extensions_getExtensionID'
 
 export const redwoodjs_vsc_telemetry_reporter2 = memoize(
   (ctx: vscode.ExtensionContext) => {

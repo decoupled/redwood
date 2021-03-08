@@ -1,7 +1,7 @@
 import { memoize } from 'lodash'
 import * as vscode from 'vscode'
 
-export function redwoodjs_vsc_log(str: string) {
+export function log(str: string) {
   redwood_output().appendLine(str)
 }
 

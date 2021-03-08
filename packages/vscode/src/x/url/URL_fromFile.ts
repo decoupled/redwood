@@ -7,6 +7,7 @@ import { isAbsolute, join, normalize, sep as path_sep } from 'path'
  * TOOD: rename to URL_fromFile
  * @param filePath
  */
+
 export function URL_fromFile(filePath: string, ...parts: string[]): string {
   if (filePath.startsWith(FILE_SCHEME)) {
     filePath = filePath.substr(FILE_SCHEME.length)

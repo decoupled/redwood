@@ -2,7 +2,7 @@ const category = 'Redwood'
 
 const base = 'decoupled.redwoodjs-ide.commands'
 
-export const redwoodjs_vsc_commands = {
+export const commands = {
   redwood_outline: {
     command: base + '.outline',
     title: 'Show Project Outline',

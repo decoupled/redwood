@@ -3,38 +3,20 @@ import vscode from 'vscode'
 
 import { redwoodjs_vsc_enabled } from '../redwoodjs_vsc_enabled'
 
-import { redwoodjs_vsc_commands } from './redwoodjs_vsc_commands'
+import { commands } from './commands'
 
-export function redwoodjs_vsc_commands_activate(ctx: vscode.ExtensionContext) {
+export function commands_activate(ctx: vscode.ExtensionContext) {
   const { registerCommand, executeCommand } = vscode.commands
-  const c = redwoodjs_vsc_commands
+  const c = commands
   ctx.subscriptions.push(
-    // registerCommand(c.redwood_dev.command, async () => {
-    //   executeCommand("redwoodjs.cli", "dev open=/")
-    // }),
-    // registerCommand(c.redwood_dev_current.command, async () => {
-    //   // TODO: get current file
-    //   executeCommand("redwoodjs.cli", "dev open=/")
-    // }),
     registerCommand(c.redwood_generate.command, async () => {
       // TODO: get current file
       executeCommand('redwoodjs.cli', 'generate...')
     }),
-    // registerCommand(c.redwood_graphql.command, async () => {
-    //   // TODO: get current file
-    //   //executeCommand("redwoodjs.cli", "generate...")
-    // }),
     registerCommand(c.redwood_outline.command, async () => {
       // TODO: reveal outline
       //executeCommand("redwoodjs.cli", "generate...")
     })
-    // registerCommand(c.redwood_storybook.command, async () => {
-    //   // TODO: reveal outline
-    //   executeCommand("redwoodjs.cli", "storybook open")
-    // }),
-    // registerCommand(c.redwood_storybook_current.command, async () => {
-    //   executeCommand("redwoodjs.cli", "storybook open=/")
-    // })
   )
 
   // registerCommand(c.redwood_debug.command, async () => {
@@ -84,8 +66,8 @@ export function redwoodjs_vsc_commands_activate(ctx: vscode.ExtensionContext) {
 }
 
 export function ___buildmeta___() {
-  const commands = values(redwoodjs_vsc_commands)
-  const command_ids = commands.map((c) => c.command)
+  const commands_ = values(commands)
+  const command_ids = commands_.map((c) => c.command)
   // only enable when in a redwood project
   const commandPalette = command_ids.map((command) => ({
     command,

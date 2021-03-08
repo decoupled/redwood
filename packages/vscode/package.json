@@ -7,6 +7,21 @@
   "files": [
     "dist"
   ],
+  "activationEvents": [
+    "*"
+  ],
+  "extensionDependencies": [
+    "auchenberg.vscode-browser-preview",
+    "GraphQL.vscode-graphql"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "_redwoodjs.show_new_version_message",
+        "title": "show new version message"
+      }
+    ]
+  },
   "dependencies": {
     "command-exists": "^1.2.9",
     "execa": "^5.0.0",

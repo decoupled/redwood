@@ -13,11 +13,12 @@ import {
   TransportKind,
 } from 'vscode-languageclient/node'
 
-import { URL_fromFile } from '../../../url/URL_fromFile'
-import { vscode_window_createTerminal_andRun } from '../../../vscode/vscode_window_createTerminal_andRun'
-import { redwoodjs_vsc_log } from '../../redwoodjs_vsc_log'
+import { URL_fromFile } from 'src/x/url/URL_fromFile'
+import { vscode_window_createTerminal_andRun } from 'src/x/vscode/vscode_window_createTerminal_andRun'
 
-import { redwoodjs_vsc_lsp_treeview_setup } from './treeview/redwoodjs_vsc_lsp_treeview_setup'
+import { log } from '../log'
+
+import { treeview_setup } from './treeview/lsp_treeview_setup'
 
 /**
  * the lsp module can come and go as the user installs/uninstalls node_modules.
@@ -64,7 +65,7 @@ export class RedwoodLSPClient {
   client!: LanguageClient
   private log(...args: any[]) {
     const msg = args.map(String).join(' ')
-    redwoodjs_vsc_log(msg)
+    log(msg)
     console.log(msg)
   }
   @memo()
@@ -148,7 +149,7 @@ export class RedwoodLSPClient {
   @memo()
   private setupOutline2() {
     const { client, ctx } = this
-    redwoodjs_vsc_lsp_treeview_setup({ client, ctx })
+    treeview_setup({ client, ctx })
   }
 
   async stop() {

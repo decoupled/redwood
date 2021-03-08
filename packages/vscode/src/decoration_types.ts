@@ -1,15 +1,13 @@
 import { memoize } from 'lodash'
 import * as vscode from 'vscode'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const lightblue = '#9cdcfe'
 const purple = '#c586c0'
 const yellow = '#dcdcaa'
 
-export const redwoodjs_vsc_decoration_types = memoize(() => {
-  const tt = vscode.window.createTextEditorDecorationType
+export const decoration_types = memoize(() => {
+  const dt = vscode.window.createTextEditorDecorationType
   return {
-    path_punctuation: tt({
+    path_punctuation: dt({
       // use a themable color. See package.json for the declaration and default values.
       //color: "#0090FF",
       //color: "#0182E4",
@@ -18,13 +16,13 @@ export const redwoodjs_vsc_decoration_types = memoize(() => {
       //fontStyle: "italic",
       opacity: '0.5',
     }),
-    path_slash: tt({
+    path_slash: dt({
       opacity: '0.7',
     }),
-    path_parameter: tt({
+    path_parameter: dt({
       color: yellow,
     }),
-    path_parameter_type: tt({
+    path_parameter_type: dt({
       color: purple,
     }),
   }

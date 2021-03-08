@@ -1,20 +1,25 @@
 import { LazyGetter as lazy } from 'lazy-get-decorator'
-import { values } from 'lodash'
-import { Memoize as memo } from 'lodash-decorators'
 import { computed, observable, reaction } from 'mobx'
 import { now } from 'mobx-utils'
 import vscode from 'vscode'
 
-import { redwoodjs_get_installed_framework_version_for_project } from '../../util/redwoodjs_get_installed_framework_version_for_project'
-import { redwoodjs_get_latest_version } from '../../util/redwoodjs_get_latest_version'
+import { framework_version__installed } from '../util/framework_version__installed'
+import { framework_version__latest } from '../util/framework_version__latest'
 
-export class RedwoodjsStatusBarManager {
-  private disposables: vscode.Disposable[] = []
-  constructor(
-    private opts: { ctx: vscode.ExtensionContext; projectRoot: string }
-  ) {
+interface Opts {
+  ctx: vscode.ExtensionContext
+  projectRoot: string
+}
+
+export function statusbar(opts: Opts) {
+  // eslint-disable-next-line no-new
+  new RedwoodjsStatusBarManager(opts)
+}
+
+class RedwoodjsStatusBarManager {
+  constructor(private opts: Opts) {
     const d1 = vscode.commands.registerCommand(
-      commandss.show_new_version_message.command,
+      '_redwoodjs.show_new_version_message',
       async () => {
         if (!this.installedFrameworkVersion) {
           return
@@ -25,7 +30,8 @@ export class RedwoodjsStatusBarManager {
         vscode.window.showInformationMessage(m)
       }
     )
-    this.disposables.push(d1)
+
+    this.sub(d1)
 
     const d2 = reaction(
       () => this.statusBarItemText,
@@ -35,28 +41,25 @@ export class RedwoodjsStatusBarManager {
       { fireImmediately: true }
     )
 
-    this.disposables.push({ dispose: d2 })
+    this.sub({ dispose: d2 })
 
     this.fetchLatestVersion()
   }
 
-  @memo()
-  dispose() {
-    this.disposables.forEach((d) => d.dispose())
+  private sub(d: vscode.Disposable) {
+    this.opts.ctx.subscriptions.push(d)
   }
 
   @computed
   get installedFrameworkVersion() {
-    const v = redwoodjs_get_installed_framework_version_for_project(
-      this.opts.projectRoot
-    )
+    const v = framework_version__installed(this.opts.projectRoot)
     now(v ? 3000 : 1000)
     return v
   }
 
   @observable latestVersion: string | undefined
   private async fetchLatestVersion() {
-    this.latestVersion = await redwoodjs_get_latest_version()
+    this.latestVersion = await framework_version__latest()
   }
 
   @computed get newerVersionIsAvailable() {
@@ -88,27 +91,9 @@ export class RedwoodjsStatusBarManager {
       100
     )
     si.text = this.statusBarItemText
-    si.command = commandss.show_new_version_message.command
+    si.command = '_redwoodjs.show_new_version_message'
     si.show()
-    this.disposables.push(si)
+    this.sub(si)
     return si
-  }
-}
-
-const commandss = {
-  show_new_version_message: {
-    command: '_decoupled.redwoodjs-ide.show_new_version_message',
-    title: 'show new version message',
-  },
-}
-
-export function ___buildmeta___() {
-  const commands = values(commandss)
-  return {
-    pjson: {
-      contributes: {
-        commands,
-      },
-    },
   }
 }

@@ -3,39 +3,31 @@ import { dirname, join } from 'path'
 import { existsSync } from 'fs-extra'
 import { LazyGetter as lazy } from 'lazy-get-decorator'
 import { groupBy } from 'lodash'
-import { computed, observable, reaction } from 'mobx'
-import { now } from 'mobx-utils'
 import * as vscode from 'vscode'
 import { Location as LSPLocation } from 'vscode-languageserver-types'
 
-import { vscode_mobx } from '../vscode/vscode_mobx'
-
-import { redwoodjs_vsc_decoration_types } from './redwoodjs_vsc_decoration_types'
-import { redwoodjs_vsc_log } from './redwoodjs_vsc_log'
-import { redwoodjs_vsc_telemetry_reporter2 } from './telemetry/telemetry2'
-import { redwoodjs_get_installed_framework_version_for_project } from './util/redwoodjs_get_installed_framework_version_for_project'
-import { redwoodjs_vsc_commands_activate } from './vsc/commands/redwoodjs_vsc_commands_activate'
-import { RedwoodLSPClientManager } from './vsc/lsp/redwoodjs_vsc_lsp_client'
-import { redwoodjs_vsc_lsp_path_for_project } from './vsc/lsp/redwoodjs_vsc_lsp_path_for_project'
-import { redwoodjs_vsc_enabled } from './vsc/redwoodjs_vsc_enabled'
-import { redwoodjs_vsc_newVersionMessage } from './vsc/redwoodjs_vsc_newVersionMessage'
-import { RedwoodjsStatusBarManager } from './vsc/statusbar/redwoodjs_vsc_statusbar'
+import { commands_activate } from './commands/commands_activate'
+import { decoration_types } from './decoration_types'
+import { log } from './log'
+import { RedwoodLSPClientManager } from './lsp/lsp_client'
+import { lsp_path_for_project } from './lsp/lsp_path_for_project'
+import { new_version_message } from './new_version_message'
+import { redwoodjs_vsc_enabled } from './redwoodjs_vsc_enabled'
+import { statusbar } from './statusbar/statusbar'
+import { redwoodjs_vsc_telemetry_reporter2 } from './telemetry/telemetry'
+import { framework_version__installed } from './util/framework_version__installed'
 
 export async function redwoodjs_vsc(ctx: vscode.ExtensionContext) {
   // new version check. we can get rid of this once the old version
   // is removed from the store
-  if (await redwoodjs_vsc_newVersionMessage(ctx)) {
+  if (await new_version_message(ctx)) {
     // stop all initialization
     return
   }
   redwoodjs_vsc_telemetry_reporter2(ctx)
   const manager = new RedwoodVSCProjectManager(ctx)
-  ctx.subscriptions.push({
-    dispose() {
-      manager.stop()
-    },
-  })
-  redwoodjs_vsc_commands_activate(ctx)
+  ctx.subscriptions.push(manager)
+  commands_activate(ctx)
   // initialize here...
 
   //DEV && redwoodjs_vsc_treeview22_activate(ctx)
@@ -88,13 +80,13 @@ class RedwoodVSCProjectManager {
       setTimeout(() => this.tick(), 1000)
     }
   }
-  stop() {
+  dispose() {
     this.stopped = true
   }
 }
 
 function redwoodjs_vsc_enabled_set(v: boolean) {
-  redwoodjs_vsc_log('setContext redwoodjs_vsc_enabled = ' + v)
+  log('setContext redwoodjs_vsc_enabled = ' + v)
   vscode.commands.executeCommand('setContext', redwoodjs_vsc_enabled, v)
 }
 
@@ -108,31 +100,17 @@ class RedwoodVSCProject {
   private disposables: vscode.Disposable[] = []
   constructor(public opts: Opts) {
     console.log('new RedwoodVSCProject(' + opts.projectRoot + ')')
-    redwoodjs_vsc_log('new RedwoodVSCProject(' + opts.projectRoot + ')')
-    this.disposables.push(new RedwoodjsStatusBarManager(opts))
+
+    log('new RedwoodVSCProject(' + opts.projectRoot + ')')
+
+    statusbar(opts)
+
     redwoodjs_vsc_telemetry_reporter2(
       this.opts.ctx
     ).event_redwoodProjectDetected({
       redwoodVersion: this.redwoodVersion ?? '',
     })
-    const d1 = reaction(
-      () => this.activeVSCodeFileName,
-      (x) => {
-        if (x) {
-          this.vscodeDidNavigate(x)
-        }
-      }
-    )
-    const d2 = reaction(
-      () => this.url,
-      (x) => {
-        if (x) {
-          this.browserDidNavigate(x)
-        }
-      }
-    )
-    this.disposables.push({ dispose: d1 })
-    this.disposables.push({ dispose: d2 })
+
     setInterval(() => {
       this.updateDecorations()
     }, 300)
@@ -142,9 +120,7 @@ class RedwoodVSCProject {
 
   @lazy()
   get redwoodVersion() {
-    return redwoodjs_get_installed_framework_version_for_project(
-      this.projectRoot
-    )
+    return framework_version__installed(this.projectRoot)
   }
 
   @lazy()
@@ -156,10 +132,10 @@ class RedwoodVSCProject {
   get lspServerPath() {
     const p = getLSPPathForProject(this.projectRoot)
     if (!p) {
-      redwoodjs_vsc_log(`could not find redwood language server`)
+      log(`could not find redwood language server`)
       throw new Error('lsp not found')
     }
-    redwoodjs_vsc_log(`redwood language server path = ${p}`)
+    log(`redwood language server path = ${p}`)
     return p
   }
 
@@ -182,7 +158,7 @@ class RedwoodVSCProject {
       (i) => i.kind === 'Decoration'
     )
     const grouped = groupBy(decs, (d) => d.style)
-    const decorationTypes = redwoodjs_vsc_decoration_types()
+    const decorationTypes = decoration_types()
     for (const style of Object.keys(grouped)) {
       const dt = decorationTypes[style]
       if (!dt) {
@@ -209,104 +185,16 @@ class RedwoodVSCProject {
     this.updateDecorationsForEditor(activeTextEditor)
   }
 
-  private async browserDidNavigate(routePath: string) {
-    if (!this.syncNav) {
-      return
-    }
-    const filePath = await this.lspClient.client?.getFilePathForRoutePath(
-      routePath
-    )
-    if (!filePath) {
-      return
-    }
-    if (this.activeVSCodeFileName === filePath) {
-      return
-    }
-    await vscode.window.showTextDocument(vscode.Uri.file(filePath), {
-      viewColumn: vscode.ViewColumn.One, // TODO: figure out dynamically where to put this
-      preserveFocus: true,
-    })
-  }
-
-  private async vscodeDidNavigate(filePath: string) {
-    if (!this.syncNav) {
-      return
-    }
-    const path = await this.lspClient.client?.getRoutePathForFilePath(filePath)
-    if (!path) {
-      return
-    }
-    this.url = path
-  }
-
-  @computed
-  get activeVSCodeFileName() {
-    now(100)
-    return vscode_mobx().activeTextEditor$$?.document.fileName
-  }
-
-  @observable url = ''
-  @observable syncNav = false
-  syncNavToggle() {
-    this.syncNav = !this.syncNav
-  }
-
   dispose() {
     this.disposables.forEach((d) => d.dispose())
   }
-
-  // async provideHover(
-  //   document: vscode.TextDocument,
-  //   position: vscode.Position,
-  //   token: vscode.CancellationToken
-  // ): Promise<vscode.Hover | undefined> {
-  //   if (this.isRoutes(document)) {
-  //     //await wait(5000)
-  //     const src = document.getText()
-  //     const offset = document.offsetAt(position)
-  //     const pw = this.createProjectWrapper()
-  //     const route = pw.router.routes.find(route =>
-  //       route.jsxNode.containsRange(offset, offset + 1)
-  //     )
-  //     if (!route) return
-  //     if (!route.path) return
-  //     if (route.path?.includes("{")) return
-  //     const range = tsm_Node_to_Range(route.jsxNode, document)
-  //     const routeURL = await redwoodjs_getPreviewUrl({
-  //       routePath: route.path,
-  //       projectRoot: this.projectRoot,
-  //     })
-  //     const thumbFilePath = await get_page_thumb(routeURL)
-  //     const openCommandUri = vscode_Uri_command(
-  //       package_json_commands.redwood_browser.command,
-  //       [route.path]
-  //     )
-  //     const openCommandUri2 = vscode_Uri_command(
-  //       package_json_commands.redwood_browser_external.command,
-  //       [routeURL]
-  //     )
-  //     if (!thumbFilePath) return undefined
-  //     const cacheBuster = Date.now()
-  //     const imgUri = encodeURI(`file://${thumbFilePath}#${cacheBuster}`)
-  //     const str1 = new vscode.MarkdownString(`![](${imgUri})`)
-  //     const str2 = new vscode.MarkdownString(
-  //       `Open in [External Browser](${openCommandUri2} "Open this page in an external browser")`
-  //     )
-  //     // const str2 = new vscode.MarkdownString(
-  //     //   `Open in [VSCode Browser](${openCommandUri} "Open this page in VSCode") | [External Browser](${openCommandUri2} "Open this page in an external browser")`
-  //     // )
-  //     str2.isTrusted = true
-  //     const hover = new vscode.Hover([str1, str2], range)
-  //     return hover
-  //   }
-  // }
 }
 
 function getLSPPathForProject(projectRoot: string) {
   const ALDO_DEV = true
   const dev_time =
     '/Users/aldo/com.github/redwoodjs/redwood-22/packages/structure/dist/language_server/start.js'
-  const normal = redwoodjs_vsc_lsp_path_for_project(projectRoot)
+  const normal = lsp_path_for_project(projectRoot)
   const candidates: string[] = []
   if (ALDO_DEV) {
     candidates.push(dev_time)

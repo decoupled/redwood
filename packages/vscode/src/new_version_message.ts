@@ -1,9 +1,9 @@
 import { LazyGetter as lazy } from 'lazy-get-decorator'
 import vscode from 'vscode'
 
-import { vscode_extensions_getExtensionID } from '../../vscode/vscode_extensions_getExtensionID'
+import { vscode_extensions_getExtensionID } from './x/vscode/vscode_extensions_getExtensionID'
 
-export async function redwoodjs_vsc_newVersionMessage(
+export async function new_version_message(
   ctx: vscode.ExtensionContext
 ): Promise<boolean> {
   const ff = new Run(ctx)
